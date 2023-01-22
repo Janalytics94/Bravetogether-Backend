@@ -2,38 +2,31 @@ import os
 from datetime import date
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request
-from flask_cors import CORS
-from flask_pymongo import PyMongo
+
+
+from chalice import Chalice
+from pymongo import MongoClient
 
 load_dotenv()
 user = os.environ.get("USER")
 password = os.environ.get("PASSWORD")
+host = os.environ.get("HOST")
 if user is None or password is None:
     raise RuntimeError(
-        "User and password for MongoDB connection required. Could not find USER and PASSWORD environment variables."
+        "User and password for MongoDB connection required. Could not find USER, PASSWORD and HOST environment variables."
     )
 
-app = Flask(__name__)
-
-cors = CORS(app, resources={r"/UserSurveys/*": {"origins": "*"}})
-app.config["MONGO_DBNAME"] = "AgainstSexualHarassment"
-app.config["MONGO_URI"] = (
-    "mongodb+srv://"
-    + user
-    + ":"
-    + password
-    + "@againstsexualharrassmen.kc68g.mongodb.net/AgainstSexualHarassment?retryWrites=true&w=majority"
-)
+app = Chalice(app_name="bravetogether-backend")
+app.api.cors = True
 
 
-mongo = PyMongo(app)
-
+mongo = MongoClient(f"mongodb+srv://{user}:{password}@{host}/AgainstSexualHarassment?retryWrites=true&w=majority")
+db = mongo.AgainstSexualHarassment
 
 # Get them all
 @app.route("/UserSurveys", methods=["GET"])
 def get_all_user_surveys():
-    UserSurveys = mongo.db.UserSurveys
+    UserSurveys = db.UserSurveys
     output = []
     for u in UserSurveys.find():
         output.append(
@@ -47,50 +40,53 @@ def get_all_user_surveys():
                 "feelings": u["feelings"],
             }
         )
-    return jsonify({"result": output})
+    return {"result": output}
 
 
 # Get one
-@app.route("/UserSuveys/search/<_id>", methods=["GET"])
-def get_one_user_survey():
-    UserSurveys = mongo.db.UserSurveys
+@app.route("/UserSuveys/search/{id}", methods=["GET"])
+def get_one_user_survey(id):
+    UserSurveys = db.UserSurveys
     output = []
     for u in UserSurveys.find():
         output.append({"_id": u["_id"]})
-    return jsonify({"result": output})
+    return {"result": output}
 
 
 @app.route("/UserSurveys/add", methods=["POST"])
 def add_experience():
-    UserSurveys = mongo.db.UserSurveys
+    UserSurveys = db.UserSurveys
+    request = app.current_request
+    print(request.to_dict())
+    print(request.raw_body)
+    print(request.json_body)
 
     # Personal Information
-    # _id = request.json['_id']  # Automaticly generated?
-    sex = request.json["sex"]  # Selection
-    age = request.json["age"]
+    sex = request.json_body["sex"]  # Selection
+    age = request.json_body["age"]
 
     # When
-    when = request.json["when"]
+    when = request.json_body["when"]
 
     # Where
-    where = request.json["where"]  # Bus, Tram, Straße, Park, Wald etc.
-    address = request.json["address"]
+    where = request.json_body["where"]  # Bus, Tram, Straße, Park, Wald etc.
+    address = request.json_body["address"]
 
     # What
-    what = request.json["what"]  # Selection
-    circumstances = request.json["circumstances"]
+    what = request.json_body["what"]  # Selection
+    circumstances = request.json_body["circumstances"]
 
     # Was the Incident reported ?
-    reported = request.json["reported"]
+    reported = request.json_body["reported"]
 
     # How did you feel ?
-    feelings = request.json["feelings"]  # Freitext
+    feelings = request.json_body["feelings"]  # Freitext
 
     insert_date = date.today()
     insert_date = insert_date.strftime("%d/%m/%Y")
 
     # Alle Felder sollen die frei bleiben können, wenn jemand einfach keine genauen Angaben mehr machen kann.
-    UserSurveys.insert_one(
+    insert_result = UserSurveys.insert_one(
         {
             "sex": sex,  # Selection
             "age": age,
@@ -105,6 +101,7 @@ def add_experience():
         }
     )
     output = {
+        "_id": str(insert_result.inserted_id),
         "sex": sex,
         "age": age,
         "when": when,
@@ -114,8 +111,4 @@ def add_experience():
         "feelings": feelings,
         "insert_date": insert_date,
     }
-    return jsonify({"result": output})
-
-
-if __name__ == "__main__":
-    app.run(debug=False, port=os.environ.get("PORT", 5000))
+    return {"result": output}

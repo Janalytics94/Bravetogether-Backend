@@ -1,7 +1,8 @@
 {
-  "python.analysis.typeCheckingMode": "basic",
-  "python.formatting.provider": "black",
-  "python.linting.flake8Enabled": true,
-  "python.analysis.indexing": true,
-  "python.analysis.autoImportCompletions": true
+    "python.analysis.typeCheckingMode": "off",
+    "python.formatting.provider": "black",
+    "python.linting.flake8Enabled": true,
+    "python.analysis.indexing": true,
+    "python.analysis.autoImportCompletions": true,
+    "python.terminal.activateEnvironment": true
 }

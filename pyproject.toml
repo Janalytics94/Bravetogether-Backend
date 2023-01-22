@@ -1,24 +1,21 @@
 [tool.poetry]
 name = "bravetogether-backend"
 version = "0.1.0"
-description = ""
+description = "Sexual Harrassment has no place in our world but is still a common issue in a woman's life. Share your experience and I analyze the outcome to fight against it in unity."
 authors = ["Philipp Page <github@philipp-page.de>"]
 readme = "README.md"
-packages = [{include = "bravetogether_backend"}]
+packages = [{ include = "bravetogether_backend" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-flask = "^2.2.2"
-flask-cors = "^3.0.10"
-flask-pymongo = "^2.3.0"
 python-dotenv = "^0.21.0"
+chalice = "^1.27.3"
+pymongo = "^4.3.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
 flake8 = "^6.0.0"
 mypy = "^0.991"
-types-flask-cors = "^3.0.10"
-pymongo-stubs = "^0.2.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -31,4 +28,4 @@ line-length = 120
 profile = "black"
 
 [tool.mypy]
-files = "python_starter"
+files = "bravetogether_backend"

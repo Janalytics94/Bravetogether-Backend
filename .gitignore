@@ -165,3 +165,7 @@ cython_debug/
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# Chalice
+*/**/.chalice/deployments/
+*/**/.chalice/venv/
