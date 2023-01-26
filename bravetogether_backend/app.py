@@ -1,10 +1,8 @@
 import os
 from datetime import date
 
-from dotenv import load_dotenv
-
-
 from chalice import Chalice
+from dotenv import load_dotenv
 from pymongo import MongoClient
 
 load_dotenv()
@@ -22,6 +20,7 @@ app.api.cors = True
 
 mongo = MongoClient(f"mongodb+srv://{user}:{password}@{host}/AgainstSexualHarassment?retryWrites=true&w=majority")
 db = mongo.AgainstSexualHarassment
+
 
 # Get them all
 @app.route("/UserSurveys", methods=["GET"])
